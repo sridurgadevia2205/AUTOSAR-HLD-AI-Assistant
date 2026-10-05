@@ -1,0 +1,6 @@
+streamlit==1.65.0
+sentence-transformers
+scikit-learn
+transformers==5.0.0
+torch
+numpy
