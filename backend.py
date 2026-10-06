@@ -1,4 +1,4 @@
-
+import pymupdf
 import numpy as np
 from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
@@ -493,4 +493,65 @@ def ask_hld(question, top_k=3, threshold=0.55):
         ],
         "score": best_score
     }
+
+def extract_pdf_text(pdf_path):
+    """
+    Extract text from an AUTOSAR HLD PDF while preserving page numbers.
+    """
+
+    doc = pymupdf.open(pdf_path)
+
+    pages = []
+
+    for page_number, page in enumerate(doc, start=1):
+        text = page.get_text().strip()
+
+        if text:
+            pages.append({
+                "page": page_number,
+                "text": text
+            })
+
+    doc.close()
+
+    return pages
+
+def load_hld_pdf(pdf_path):
+    """
+    Load an AUTOSAR HLD PDF and create chunks + embeddings dynamically.
+    """
+
+    global chunks, embeddings
+
+    # Extract page-wise text
+    pages = extract_pdf_text(pdf_path)
+
+    # Create chunks
+    new_chunks = []
+
+    for i, page_data in enumerate(pages, start=1):
+        new_chunks.append({
+            "id": i,
+            "page": page_data["page"],
+            "text": page_data["text"]
+        })
+
+    # Generate embeddings
+    chunk_texts = [chunk["text"] for chunk in new_chunks]
+
+    new_embeddings = embedding_model.encode(
+        chunk_texts,
+        convert_to_numpy=True
+    )
+
+    # Replace existing document data
+    chunks = new_chunks
+    embeddings = new_embeddings
+
+    print("HLD PDF loaded successfully!")
+    print("Pages:", len(pages))
+    print("Chunks:", len(chunks))
+    print("Embedding shape:", embeddings.shape)
+
+    return chunks
 

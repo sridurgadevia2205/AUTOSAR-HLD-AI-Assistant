@@ -1,4 +1,3 @@
-
 import streamlit as st
 import backend
 
@@ -31,6 +30,37 @@ st.write(
 # ============================================================
 
 st.sidebar.title("Navigation")
+
+
+# ============================================================
+# PDF UPLOAD
+# ============================================================
+
+st.sidebar.subheader("📄 HLD Document")
+
+uploaded_file = st.sidebar.file_uploader(
+    "Upload AUTOSAR HLD PDF",
+    type=["pdf"]
+)
+
+if uploaded_file is not None:
+
+    if st.sidebar.button("Load HLD"):
+
+        temp_pdf_path = "uploaded_hld.pdf"
+
+        with open(temp_pdf_path, "wb") as f:
+            f.write(uploaded_file.getbuffer())
+
+        backend.load_hld_pdf(temp_pdf_path)
+
+        st.session_state["hld_loaded"] = True
+        st.sidebar.success("HLD loaded successfully!")
+
+
+# ============================================================
+# NAVIGATION
+# ============================================================
 
 section = st.sidebar.radio(
     "Select Feature",
